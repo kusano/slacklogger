@@ -107,8 +107,8 @@ def main():
 while True:
     try:
         main()
-    except e:
-        print e
+    except:
+        pass
     print 'Disconnect. wait %d sec' % wait
     time.sleep(wait)
     wait = min(60, max(1, wait*2))
