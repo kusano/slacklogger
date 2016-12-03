@@ -105,6 +105,7 @@ def main():
     ws.run_forever()
 
 while True:
+    global wait
     try:
         main()
     except:
