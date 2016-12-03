@@ -25,6 +25,7 @@ def api(method, param):
 def log(message):
     t = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
     print t, message
+log('start')
 
 def on_message(ws, message):
     global users
@@ -105,7 +106,6 @@ def main():
     ws.run_forever()
 
 while True:
-    global wait
     try:
         main()
     except:
