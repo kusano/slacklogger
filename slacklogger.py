@@ -58,9 +58,9 @@ def on_message(ws, message):
     elif type=='goodbye':
         log('goodbye')
     elif type=='message':
-        channel = channels[message['channel']]
-        user = users[message['user']]
-        text = message['text']
+        channel = channels[message['channel']] if 'channel' in message else ''
+        user = users[message['user']] if 'user' in message else ''
+        text = message['text'] if 'text' in message else ''
         text = re.sub(r'<#([A-Z0-9]+)(|[^>]*)?>', lambda m: '#'+channels[m.group(1)], text) 
         text = re.sub(r'<@([A-Z0-9]+)(|[^>]*)?>', lambda m: '@'+users[m.group(1)], text) 
         text = text.replace('&amp;', '&')
