@@ -42,8 +42,9 @@ def on_message(ws, message):
         log('error')
         log(message['error'])
         raise 'Error'
+
     elif type=='channel_archive':
-        log('channel_archive')
+        log('channel #%s archived' % channels[message['channel']])
     elif type=='channel_created':
         channels[message['channel']['id']] = message['channel']['name']
         log('channel #%s created' % channels[message['channel']['id']])
@@ -94,6 +95,8 @@ def main():
     channels = {}
     for c in res['channels']:
         channels[c['id']] = c['name']
+    for c in res['groups']:
+        channels[c['id']] = c['name']
 
     url = res['url']
     print 'URL:', url
@@ -105,6 +108,7 @@ def main():
         on_close = on_close)
     ws.run_forever()
 
+wait = 1
 while True:
     try:
         main()
