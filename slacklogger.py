@@ -98,7 +98,6 @@ def main():
     url = res['url']
     print 'URL:', url
 
-    websocket.enableTrace(True)
     ws = websocket.WebSocketApp(
         url,
         on_message = on_message,
