@@ -1,7 +1,6 @@
 # slacklogger
 
 ```
-pip install websocket-client
-pip install pytz
-PYTHONIOENCODING=utf-8 python -u slacklogger.py token
+pip install -r requirements.txt
+SLACK_TOKEN=... python -u slacklogger.py
 ```

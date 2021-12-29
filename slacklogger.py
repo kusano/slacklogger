@@ -1,30 +1,21 @@
-import sys, urllib, urllib2, json, re, logging, datetime, time
+import os, requests, websocket, time, datetime, json, re
 
-# pip install websocket-client
-import websocket
-# pip install pytz
-import pytz
-
-logging.basicConfig()    # ?
-
-if len(sys.argv)!=2:
-    print 'slacklogger.py token'
-    exit(0)
-token = sys.argv[1]
+if 'SLACK_TOKEN' not in os.environ:
+    print('SLACK_TOKEN=... python -u slacklogger.py')
+token = os.environ['SLACK_TOKEN']
 
 def api(method, param):
     p = {'token': token}
     p.update(param)
-    req = urllib2.Request('https://slack.com/api/'+method, urllib.urlencode(p))
-    res = json.loads(urllib2.urlopen(req).read())
+    res = requests.post('https://slack.com/api/'+method, p).json()
     if not res['ok']:
-        print res
+        print(res)
         raise 'Failed'
     return res
 
 def log(message):
-    t = datetime.datetime.now(pytz.timezone('Asia/Tokyo')).strftime('%Y/%m/%d %H:%M:%S')
-    print t, message
+    t = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y/%m/%d %H:%M:%S')
+    print(t, message)
 log('start')
 
 def on_message(ws, message):
@@ -99,7 +90,7 @@ def main():
         channels[c['id']] = c['name']
 
     url = res['url']
-    print 'URL:', url
+    print('URL:', url)
 
     ws = websocket.WebSocketApp(
         url,
@@ -114,6 +105,6 @@ while True:
         main()
     except:
         pass
-    print 'Disconnect. wait %d sec' % wait
+    print('Disconnect. wait %d sec' % wait)
     time.sleep(wait)
     wait = min(60, max(1, wait*2))
