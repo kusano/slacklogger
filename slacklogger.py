@@ -1,4 +1,4 @@
-import os, requests, websocket, time, datetime, json, re
+import os, requests, websocket, time, datetime, json, re, traceback
 
 if 'SLACK_TOKEN' not in os.environ:
     print('SLACK_TOKEN=... python -u slacklogger.py')
@@ -10,7 +10,7 @@ def api(method, param):
     res = requests.post('https://slack.com/api/'+method, p).json()
     if not res['ok']:
         print(res)
-        raise 'Failed'
+        raise Exception('Failed')
     return res
 
 def log(message):
@@ -32,7 +32,7 @@ def on_message(ws, message):
     elif type=='error':
         log('error')
         log(message['error'])
-        raise 'Error'
+        raise Exception('Error')
 
     elif type=='channel_archive':
         log('channel #%s archived' % channels[message['channel']])
@@ -68,27 +68,36 @@ def on_message(ws, message):
         log('user @%s renamed to @%s' % (old, users[message['user']['id']]))
 
 def on_error(ws, error):
-    raise 'Error'
+    raise Exception('Error')
 
 def on_close(ws):
-    raise 'Closed'
+    raise Exception('Closed')
 
 def main():
     global users
     global channels
 
-    res = api('rtm.start', {})
-
+    res = api('users.list', {})
     users = {}
-    for u in res['users']:
+    for u in res['members']:
         users[u['id']] = u['name']
+    print('Number of users:', len(users))
 
     channels = {}
-    for c in res['channels']:
-        channels[c['id']] = c['name']
-    for c in res['groups']:
-        channels[c['id']] = c['name']
+    cursor = ''
+    while True:
+        param = {'limit': 1000}
+        if cursor!='':
+            param['cursor'] = cursor
+        res = api('conversations.list', param)
+        for c in res['channels']:
+            channels[c['id']] = c['name']
+        cursor = res['response_metadata']['next_cursor']
+        if cursor=='':
+            break
+    print('Number of channels:', len(channels))
 
+    res = api('rtm.connect', {})
     url = res['url']
     print('URL:', url)
 
@@ -104,7 +113,7 @@ while True:
     try:
         main()
     except:
-        pass
+        traceback.print_exc()
     print('Disconnect. wait %d sec' % wait)
     time.sleep(wait)
     wait = min(60, max(1, wait*2))
